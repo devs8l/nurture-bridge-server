@@ -358,7 +358,7 @@ Always:
                             <div>
                                 <h2 className="text-2xl font-bold mb-2">Voice Assessment Session</h2>
                                 <p className="text-blue-100 text-sm">
-                                    Answer questions about your child's behavior and development
+                                    Answer questions about your child&#39;s behavior and development
                                 </p>
                             </div>
                             
