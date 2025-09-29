@@ -1,1 +1,32 @@
 @import "tailwindcss";
+
+@font-face {
+    font-family: "alliance";
+    src: url("/public/fonts/a-r.otf");
+}
+
+.hanken{
+    font-family: "Hanken Grotesk", sans-serif;
+    font-weight: 400;
+}
+
+.alliance{
+    font-family: "alliance", sans-serif;
+}
+
+::-webkit-scrollbar {
+    width: 0px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}

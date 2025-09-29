@@ -2,6 +2,7 @@
 
 import Vapi from '@vapi-ai/web';
 import { useEffect, useState } from 'react';
+import Waveform from './Waveform';
 
 export default function ChatInterface() {
     const [isMicOn, setIsMicOn] = useState(false);
@@ -29,7 +30,7 @@ export default function ChatInterface() {
 
     // Initialize VAPI
     useEffect(() => {
-        const vapiInstance = new Vapi("2cd93cfc-2714-4bec-9d41-de9152891e0a");
+        const vapiInstance = new Vapi("8fb977db-be85-4205-b5ae-68c2314d3eea");
         setVapi(vapiInstance);
 
         // Set up event listeners
@@ -51,7 +52,8 @@ export default function ChatInterface() {
 
         vapiInstance.on('speech-start', () => {
             console.log('User started speaking');
-            addMessage('🎤 You are speaking...', 'user');
+            // Add a temporary "speaking" message for AI
+            addMessage('🎤 speaking...', 'ai');
         });
 
         vapiInstance.on('speech-end', () => {
@@ -64,7 +66,8 @@ export default function ChatInterface() {
                 if (message.role === 'user') {
                     updateLastMessage(message.transcript, 'user');
                 } else if (message.role === 'assistant') {
-                    addMessage(message.transcript, 'ai');
+                    // Instead of adding a new message, update the last AI message
+                    updateLastAIMessage(message.transcript);
                 }
             }
         });
@@ -126,6 +129,27 @@ export default function ChatInterface() {
             return messages;
         });
     };
+    const updateLastAIMessage = (text) => {
+        setMessages(prev => {
+            const messages = [...prev];
+
+            // Find the last AI message (search from the end)
+            for (let i = messages.length - 1; i >= 0; i--) {
+                if (messages[i].type === 'ai') {
+                    // Replace the "🎤 speaking..." message with the actual transcript
+                    messages[i] = {
+                        ...messages[i],
+                        text: text,
+                        timestamp: new Date()
+                    };
+                    break;
+                }
+            }
+
+            return messages;
+        });
+    };
+
 
     const startCall = async () => {
         if (!vapi) return;
@@ -136,16 +160,17 @@ export default function ChatInterface() {
         try {
             const assistant = {
                 name: "Anita",
-                firstMessage: "Hello! I'm Anita, your virtual assistant for the M-CHAT-R assessment. I'll be asking you a series of questions about your child's behavior and development. Please answer as accurately as possible. Let's get started!",
+                firstMessage: "Hello there! I'm Doctor Anita. How are you?",
                 transcriber: {
                     model: "gemini-2.0-flash",
                     language: "Multilingual",
                     provider: "google"
                 },
+                silenceTimeoutSeconds: 456,
                 voice: {
                     model: "speech-02-turbo",
                     pitch: 0,
-                    speed: 1.2,
+                    speed: 1.1,
                     region: "worldwide",
                     volume: 1,
                     voiceId: "vapi_yoshita_pvc_voice_v1",
@@ -155,14 +180,18 @@ export default function ChatInterface() {
                 },
                 model: {
                     model: "gpt-4o-mini",
+                    "toolIds": [
+                        "2491545c-ac8c-4138-9214-b5020a760629",
+                        "9ce9b0d4-4495-4649-ae11-407fe77f89be"
+                    ],
                     messages: [
                         {
                             role: "system",
                             content: `
-You are ANITA, a warm, empathetic, and motivating female assistant designed to guide parents through an autism screening for their child using the M-CHAT-R questions. 
+You are Doctor Anita, , empathetic, and motivating female assistant designed to guide parents through an autism screening for their child using the M-CHAT-R questions. 
 
 Your role:
-- Speak naturally and conversationally, not like a robot. 
+- Speak naturally and conversationally and be empathetic and reassuring.
 - Be empathetic and reassuring. Show understanding of the parent's feelings and encourage them that their participation is valuable for their child's growth. 
 - Stay motivating: express excitement when parents respond, and gently encourage them to continue. 
 - Always stay focused on the autism evaluation. If parents ask anything out of context, respond with: 
@@ -173,33 +202,28 @@ How you should behave:
 - Ask questions one by one in a natural flow. 
 - Personalize each question with the child's name when possible. 
 - Listen to the parent's response, then either acknowledge it empathetically or continue with the next question.
-- Avoid asking multiple questions at once. Stay structured but warm.
+- Avoid asking multiple questions at once. Stay structured but warm
 
-The sequence of questions you must ask (one at a time, naturally in conversation):
+You have access to two tools:
 
-1. "If you point at something across the room—say a toy or an animal—does ${childName} look at it?"
-2. "Have you ever wondered if ${childName} might be deaf?"
-3. "Does ${childName} engage in pretend or make-believe play? For example, pretending to drink from an empty cup or feeding a doll."
-4. "Does ${childName} like climbing on things—furniture, playground equipment, or stairs?"
-5. "Does ${childName} make unusual finger movements near their eyes—like wiggling fingers close to their face?"
-6. "Does ${childName} point with one finger to ask for something or get help—like pointing to a snack out of reach?"
-7. "Does ${childName} point with one finger to show you something interesting—like an airplane or big truck?" 
-8. "Is ${childName} interested in other children—watching them, smiling at them, or going to them?"
-9. "Does ${childName} ever bring something to you or hold it up for you just to share—not because they need help?"
-10. "When you call ${childName}'s name, do they respond—by looking up, babbling, or stopping what they're doing?"
-11. "When you smile at ${childName}, do they smile back at you?"
-12. "Does ${childName} get upset by everyday noises—like a vacuum cleaner or loud music?"
-13. "Does ${childName} walk?"
-14. "Does ${childName} look you in the eye when you're talking to them, playing with them, or dressing them?"
-15. "Does ${childName} try to copy what you do—like waving bye-bye, clapping, or making funny noises?"
-16. "If you turn your head to look at something, does ${childName} follow your gaze and look around at what you're looking at?"
-17. "Does ${childName} try to get you to watch them—looking at you for praise or saying 'look' or 'watch me'?"
-18. "Does ${childName} understand when you tell them to do something without pointing—like 'put the book on the chair'?"
-19. "If something new happens, does ${childName} look at your face to see how you feel about it—like hearing a strange noise?"
-20. "Does ${childName} like movement activities—being swung or bounced on your knee?"
+1. getQuestions() → Retrieves a list of all questions with their IDs and text.
+2. postAnswers(question_id, answer) → Stores a user's answer for a given question exactly as the user says word by word.
+
+Ask if the user is ready to answer questions and if user agrees, start asking following the behavior listed and always reply in the same language in which user says.
+
+Behavior rules:
+- Always check the questions with getQuestions() before asking anything.
+- Only call postAnswers() after the user has given an answer.
+- When interacting with the user, show questions naturally in conversation.
+- Confirm that an answer has been stored after calling postAnswers().
+- Do not make up answers—always get the question IDs from getQuestions().
+
+Keep responses empathetic, polite, and concise.
+The conversation would be only in english and hindi so if the language goes out of this, please request the user to speak in the above languages.
+
+
 
 Always: 
-- Thank the parent after each response.
 - Transition smoothly to the next question.
 - At the end, reassure the parent: "Thank you for answering all the questions. This really helps us understand ${childName}'s development better."
 `
@@ -210,7 +234,7 @@ Always:
                 },
 
             };
-            
+
             await vapi.start(assistant);
 
         } catch (error) {
@@ -347,49 +371,33 @@ Always:
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br bg-[#e98ea93d] flex items-center justify-center py-10">
-            <div className="container mx-auto max-w-5xl  p-6">
-
+        <div className="h-screen bg-gradient-to-br bg-white flex items-center justify-center p-4 relative">
                 {/* Main Assessment Interface */}
-                <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
+                <div className="bg-[#F5FAFC] rounded-2xl w-full shadow-2xl p-1 border h-full border-gray-100 overflow-hidden pb-24">
                     {/* Assessment Header */}
-                    <div className="bg-gradient-to-r bg-[#e98ea98c] text-white px-8 py-6">
+                    <div className="bg-gradient-to-r bg-[#E2EAE7] text-white px-8 py-6 rounded-t-2xl">
                         <div className="flex items-center justify-between">
                             <div>
-                                <h2 className="text-2xl font-bold mb-2">Voice Assessment Session</h2>
-                                <p className="text-blue-100 text-sm">
-                                    Answer questions about your child&#39;s behavior and development
-                                </p>
+                                <h2 className="text-sm text-[#222836] hanken">First year Journey of the child and family</h2>
                             </div>
-                            
                         </div>
                     </div>
 
                     {/* Messages Area with Enhanced Styling and Auto-scroll */}
-                    <div id="messages-container" className="h-100 overflow-y-auto bg-gradient-to-b from-gray-50 to-white scroll-smooth">
-                        <div className="p-6 space-y-6">
+                    <div id="messages-container" className="h-full w-[95%] mx-auto alliance  overflow-y-auto  scroll-smooth">
+                        <div className="p-6 space-y-6 pb-52">
                             {messages.map((message) => (
                                 <div
                                     key={message.id}
                                     className={`flex ${message.type === 'ai' || message.type === 'system' || message.type === 'error' ? 'justify-start' : 'justify-end'}`}
                                 >
-                                    <div className={`flex flex-col max-w-xs lg:max-w-md ${message.type === 'user' ? 'items-end' : 'items-start'}`}>
+                                    <div className={`flex flex-col max-w-xs lg:max-w-2xl ${message.type === 'user' ? 'items-end' : 'items-start'}`}>
                                         {/* Enhanced Message Bubble */}
-                                        <div className={`relative px-6 py-4 rounded-2xl shadow-md border-2 transition-all duration-300 hover:shadow-lg ${getMessageStyle(message.type)}`}>
-                                            {/* Message Header */}
-                                            <div className="flex items-center mb-2">
-                                                <span className="text-xs font-bold uppercase tracking-wide">
-                                                    {getMessageIcon(message.type)}
-                                                </span>
-                                            </div>
+                                        <div className={`relative px-6 py-4 rounded-2xl  transition-all duration-300 hover:shadow-lg `}>
+                                            
                                             {/* Message Content */}
-                                            <p className="text-sm leading-relaxed font-medium">{message.text}</p>
-
-                                            {/* Message Tail */}
-                                            <div className={`absolute w-0 h-0 ${message.type === 'user'
-                                                ? 'right-0 top-4 border-l-8 border-l-green-200 border-t-8 border-t-transparent border-b-8 border-b-transparent transform translate-x-2'
-                                                : 'left-0 top-4 border-r-8 border-r-blue-200 border-t-8 border-t-transparent border-b-8 border-b-transparent transform -translate-x-2'
-                                                }`}></div>
+                                            <p className="text-[#222836] alliance text-[28px] font-normal leading-[40px] tracking-[-0.56px]">{message.text}</p>
+                                            
                                         </div>
                                         {/* Enhanced Timestamp */}
                                         <span className="text-xs text-gray-400 mt-2 px-3 font-medium">
@@ -400,11 +408,14 @@ Always:
                             ))}
                         </div>
                     </div>
+                </div>
 
-                    {/* Seamless Input Area at Bottom */}
-                    <div className="bg-white border-t border-gray-200 p-6">
-                        <form onSubmit={handleTextSubmit} className="flex items-center space-x-3">
-                            <div className="flex-1 relative">
+                {/* Floating Input Area at Bottom Center */}
+                <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-full max-w-4xl px-6 z-50">
+                    <div className="bg-white border border-gray-300 hanken rounded-3xl shadow-2xl p-6 px-6">
+                        {/* First Row - Input Field */}
+                        <form onSubmit={handleTextSubmit} className="space-y-4">
+                            <div className="relative">
                                 <input
                                     type="text"
                                     value={textInput}
@@ -416,90 +427,100 @@ Always:
                                         }
                                     }}
                                     placeholder="Type your response or use the microphone..."
-                                    className="w-full px-6 py-4 pr-16 text-base border-2 border-gray-300 rounded-2xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-400 transition-all duration-200 shadow-sm bg-gray-50 hover:bg-white"
+                                    className="w-full    text-xl focus:outline-none    transition-all duration-200  "
                                 />
                                 {/* Clear Text Button */}
                                 {textInput && (
                                     <button
                                         type="button"
                                         onClick={() => setTextInput('')}
-                                        className="absolute right-16 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-100"
+                                        className="absolute right-4 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-100"
                                     >
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                         </svg>
                                     </button>
                                 )}
+                                
+                                {/* Send Button (positioned at the end of input) */}
+                                {textInput.trim() && (
+                                    <button
+                                        type="submit"
+                                        className="absolute right-16 top-1/2 -translate-y-1/2 p-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl shadow-lg transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300"
+                                        aria-label="Send message"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                        </svg>
+                                    </button>
+                                )}
                             </div>
 
-                            {/* Inline Microphone Button */}
-                            <button
-                                type="button"
-                                onClick={handleMicToggle}
-                                disabled={isConnecting}
-                                className={`p-4 rounded-2xl shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${callStatus === 'active'
-                                    ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 focus:ring-red-300 text-white'
-                                    : isConnecting
-                                        ? 'bg-gradient-to-r from-yellow-500 to-orange-500 focus:ring-yellow-300 text-white'
-                                        : 'bg-gradient-to-r bg-[#c4476cb2] text-white'
-                                    }`}
-                                aria-label={callStatus === 'active' ? 'Stop voice session' : 'Start voice session'}
-                            >
-                                <div className="relative">
-                                    {isConnecting ? (
-                                        <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                    ) : callStatus === 'active' ? (
-                                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M6 6h12v12H6z" />
-                                        </svg>
-                                    ) : (
-                                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z" />
-                                            <path d="M19 10v1a7 7 0 0 1-14 0v-1h2v1a5 5 0 0 0 10 0v-1h2z" />
-                                            <path d="M12 18v4m-4 0h8" />
-                                        </svg>
-                                    )}
-
-                                    {/* Pulse animation for active state */}
-                                    {callStatus === 'active' && (
-                                        <div className="absolute inset-0 rounded-2xl bg-red-400 opacity-40 animate-ping"></div>
-                                    )}
+                            {/* Second Row - Waveform, Mic Button, and Call Indicators */}
+                            <div className="flex items-center justify-between">
+                                {/* Left Side - Waveform with Call Indicators */}
+                                <div className="flex items-center space-x-3">
+                                    <div className="flex items-center">
+                                        <Waveform 
+                                            isActive={callStatus === 'active'} 
+                                            width={120} 
+                                            height={40} 
+                                        />
+                                    </div>
+                                    
+                                    {/* Call Indicators - positioned at extreme right of waveform */}
+                                    <div className="flex items-center space-x-2 text-sm">
+                                        <div className={`w-2 h-2 rounded-full ${callStatus === 'active' ? 'bg-green-500 animate-pulse' :
+                                            callStatus === 'connecting' ? 'bg-yellow-500 animate-pulse' :
+                                                callStatus === 'ended' ? 'bg-red-400' : 'bg-gray-400'
+                                            }`}></div>
+                                        <span className={`font-medium ${getStatusColor()}`}>
+                                            {getStatusText()}
+                                        </span>
+                                        {isConnecting && (
+                                            <div className="ml-2 w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                                        )}
+                                    </div>
                                 </div>
-                            </button>
 
-                            {/* Send Button (only show when there's text) */}
-                            {textInput.trim() && (
+                                {/* Right Side - Microphone Button */}
                                 <button
-                                    type="submit"
-                                    className="p-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-2xl shadow-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 focus:ring-offset-2"
-                                    aria-label="Send message"
+                                    type="button"
+                                    onClick={handleMicToggle}
+                                    disabled={isConnecting}
+                                    className={`p-4 rounded-2xl shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-offset-2 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed ${callStatus === 'active'
+                                        ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 focus:ring-red-300 text-white'
+                                        : isConnecting
+                                            ? 'bg-gradient-to-r from-yellow-500 to-orange-500 focus:ring-yellow-300 text-white'
+                                            : 'bg-gradient-to-r bg-[#5FCA89] text-white'
+                                        }`}
+                                    aria-label={callStatus === 'active' ? 'Stop voice session' : 'Start voice session'}
                                 >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                                    </svg>
+                                    <div className="relative">
+                                        {isConnecting ? (
+                                            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        ) : callStatus === 'active' ? (
+                                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M6 6h12v12H6z" />
+                                            </svg>
+                                        ) : (
+                                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z" />
+                                                <path d="M19 10v1a7 7 0 0 1-14 0v-1h2v1a5 5 0 0 0 10 0v-1h2z" />
+                                                <path d="M12 18v4m-4 0h8" />
+                                            </svg>
+                                        )}
+
+                                        {/* Pulse animation for active state */}
+                                        {callStatus === 'active' && (
+                                            <div className="absolute inset-0 rounded-2xl bg-red-400 opacity-40 animate-ping"></div>
+                                        )}
+                                    </div>
                                 </button>
-                            )}
-                        </form>
-
-                        {/* Status Indicator */}
-                        <div className="flex items-center justify-between mt-3">
-                            <div className="flex items-center space-x-2 text-sm">
-                                <div className={`w-2 h-2 rounded-full ${callStatus === 'active' ? 'bg-green-500 animate-pulse' :
-                                    callStatus === 'connecting' ? 'bg-yellow-500 animate-pulse' :
-                                        callStatus === 'ended' ? 'bg-red-400' : 'bg-gray-400'
-                                    }`}></div>
-                                <span className={`font-medium ${getStatusColor()}`}>
-                                    {getStatusText()}
-                                </span>
                             </div>
-
-                            
-                        </div>
+                        </form>
                     </div>
                 </div>
-
-
-            </div>
         </div>
     );
 }
