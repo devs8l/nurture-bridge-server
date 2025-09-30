@@ -3,6 +3,7 @@
 import Vapi from '@vapi-ai/web';
 import { useEffect, useState } from 'react';
 import Waveform from './Waveform';
+import SoundWaveform from './SoundWaveForm';
 
 export default function ChatInterface() {
     const [isMicOn, setIsMicOn] = useState(false);
@@ -52,8 +53,8 @@ export default function ChatInterface() {
 
         vapiInstance.on('speech-start', () => {
             console.log('User started speaking');
-            // Add a temporary "speaking" message for AI
-            addMessage('🎤 speaking...', 'ai');
+            // Add a temporary speaking indicator with SoundWaveform for AI
+            addMessage('speaking', 'ai');
         });
 
         vapiInstance.on('speech-end', () => {
@@ -133,20 +134,20 @@ export default function ChatInterface() {
         setMessages(prev => {
             const messages = [...prev];
 
-            // Find the last AI message (search from the end)
-            for (let i = messages.length - 1; i >= 0; i--) {
-                if (messages[i].type === 'ai') {
-                    // Replace the "🎤 speaking..." message with the actual transcript
-                    messages[i] = {
-                        ...messages[i],
-                        text: text,
-                        timestamp: new Date()
-                    };
-                    break;
-                }
-            }
+            // First, remove all AI messages that contain "speaking"
+            const filteredMessages = messages.filter(message => 
+                !(message.type === 'ai' && message.text.includes('speaking'))
+            );
 
-            return messages;
+            // Add the new AI message with the actual transcript
+            filteredMessages.push({
+                id: Date.now(),
+                text: text,
+                timestamp: new Date(),
+                type: 'ai'
+            });
+
+            return filteredMessages;
         });
     };
 
@@ -396,7 +397,13 @@ Always:
                                         <div className={`relative px-6 py-4 rounded-2xl  transition-all duration-300 hover:shadow-lg `}>
                                             
                                             {/* Message Content */}
-                                            <p className="text-[#222836] alliance text-[28px] font-normal leading-[40px] tracking-[-0.56px]">{message.text}</p>
+                                            {message.text === 'speaking' ? (
+                                                <div className="flex items-center space-x-2">
+                                                    <SoundWaveform />
+                                                </div>
+                                            ) : (
+                                                <p className="text-[#222836] alliance text-[28px] font-normal leading-[40px] tracking-[-0.56px]">{message.text}</p>
+                                            )}
                                             
                                         </div>
                                         {/* Enhanced Timestamp */}
