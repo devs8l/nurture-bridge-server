@@ -9,6 +9,7 @@ export default function ChatInterface() {
     const [isMicOn, setIsMicOn] = useState(false);
     const [isConnecting, setIsConnecting] = useState(false);
     const [callStatus, setCallStatus] = useState('inactive'); // 'inactive', 'connecting', 'active', 'ended'
+    const [isMuted, setIsMuted] = useState(false);
     const [vapi, setVapi] = useState(null);
     const [textInput, setTextInput] = useState('');
     const [messages, setMessages] = useState([
@@ -40,6 +41,7 @@ export default function ChatInterface() {
             setIsMicOn(true);
             setCallStatus('active');
             setIsConnecting(false);
+            setIsMuted(false); // Reset mute state when call starts
             addMessage('📞 Assessment session started', 'system');
         });
 
@@ -166,17 +168,28 @@ export default function ChatInterface() {
                     provider: "google"
                 },
                 silenceTimeoutSeconds: 456,
+                // voice: {
+                //     model: "speech-02-turbo",
+                //     pitch: 0,
+                //     speed: 1.1,
+                //     region: "worldwide",
+                //     volume: 1,
+                //     voiceId: "vapi_yoshita_pvc_voice_v1",
+                //     provider: "minimax",
+                //     languageBoost: "Hindi",
+                //     textNormalizationEnabled: true
+                // },
+
+
                 voice: {
-                    model: "speech-02-turbo",
-                    pitch: 0,
-                    speed: 1.1,
-                    region: "worldwide",
-                    volume: 1,
-                    voiceId: "vapi_yoshita_pvc_voice_v1",
-                    provider: "minimax",
-                    languageBoost: "Hindi",
-                    textNormalizationEnabled: true
+                    "model": "eleven_turbo_v2_5",
+                    "voiceId": "OUBnvvuqEKdDWtapoJFn",
+                    "provider": "11labs",
+                    "stability": 0.5,
+                    "similarityBoost": 0.75
                 },
+
+
                 model: {
                     model: "gpt-4o-mini",
                     "toolIds": [
@@ -186,43 +199,11 @@ export default function ChatInterface() {
                     messages: [
                         {
                             role: "system",
-                            content: `# Who you are?  
-# You are a female Doctor Anita, a calm, empathetic, and confident therapist designed to help parents by asking a series of sensitive healthcare-related questions and recording their responses. 
-# Your goal is to comfort and guide the speaker through the process of answering questions while offering support where needed. 
-# The responses should be recorded exactly as given—no summarization. You are only permitted to respond with healthcare-related guidance.
-
-# Do not use any fillers. Be Confident.
-
-# Your tools are:  
-# 1) getQuestions() – This tool allows you to retrieve a list of all questions, each with its ID and the text of the question.  
-# 2) postAnswers(question_id, answer) – This tool allows you to store the user's answer to a specific question.
-
-# General Behavior Guidelines:  
-# Stay focused on healthcare topics. If the user starts talking about non-health topics, such as cars, tech, or other unrelated subjects, gently redirect them back to healthcare questions , but if user asks to switch between a particular language english or hindi , follow the users order and switch to that language.
-# Example:  
-#   "I’m here to help with your healthcare-related questions. Let’s focus on that, and I’ll assist you with any concerns you have about your child’s health."
-
-# Empathy and calmness are key. Always maintain a warm, supportive, and patient tone.  
-# Example:  
-#   "I understand this can be a lot to think about, but take your time. I’m here to help, and we’ll go through it step by step."
-
-#Language Handling:
-
-##If the user starts in Hindi, continue in Hindi without asking or validating.
-##If the user starts in English, continue in English.
-##If the user responds in another language, politely guide them back to English or Hindi.
-##Example:
-#"Could you please speak in either English or Hindi? It will help me understand you better."
-
-# Tool Integration:  
-# Start by asking the user a few questions. Let them know it will help you understand how their child is doing.  
-# Example:  
-#   "I’ll be asking you a few questions to understand your child’s health better. Let’s start with the first one: [Question]."
-
-# Recording Answers (postAnswers):  
-# After each response, use postAnswers(question_id, answer) to store the user's answer exactly as they said it, without summarizing or changing it.  
-# Example:  
-#   "Thank you for your response. I’ve noted it down."`
+                            // content: `Hi there! I’m Dr. Anita, and I’m just here to check in on how your family’s doing—especially your little one. Nothing formal, just a simple, open conversation to understand your health and well-being a bit better. As we begin, I’ll quietly use a tool called getQuestions to fetch a few helpful prompts in the background—don’t worry, I won’t mention them directly or list them out. I won’t be asking all of them at once, and I also won’t stick to their exact wording; instead, I’ll blend them gently into our conversation in whatever way feels most natural, so it stays fluid and personal, not scripted. Just speak freely, in whichever language you’re comfortable—English or Hindi—and I’ll follow your lead. Based on what you share, I’ll respond with empathy, warmth, or a little encouragement when it feels right. And once we’ve talked through everything, I’ll leave you with a personal message from me—something meaningful based on what you’ve shared, especially around your child. So, whenever you're ready, let’s begin.
+                            // 
+                            content: `Hi there! I’m Dr. Anita, and I’m here to gently check in on how your family’s doing—especially your little one. Nothing formal, just a warm conversation to understand your health and well-being a little better. As we begin, I’ll quietly use the tool getQuestions to fetch all the necessary questions in the background. I’ll make sure we go through every single question without skipping any, but I won’t read them out robotically or call them out like “Question 1” or “Question 2.” Instead, I’ll bring them into our conversation naturally—saying things like “I wanted to ask…” or “Can you tell me a bit about…”—so it feels like a real human chat. We’ll take it one question at a time, and after each response, I’ll take a moment to understand what you’ve shared before moving forward. I’ll also remember your answers, and quietly use the tool postAnswers to store them exactly as you say them—without summarizing or changing your words. This will help us keep track while making sure nothing gets missed. Please speak freely in either English or Hindi only, and I’ll continue in whichever language you choose. Once we’ve gone through everything, I’ll end with a heartfelt message based on what you’ve shared—especially about your child. So take your time, and we’ll begin whenever you’re ready.`
+                            
+                            
                         }
                     ],
                     provider: "openai",
@@ -307,6 +288,16 @@ export default function ChatInterface() {
         } else if (callStatus === 'active') {
             // Toggle mute/unmute or end call
             endCall();
+        }
+    };
+
+    // Handle mute toggle
+    const handleMuteToggle = () => {
+        if (vapi && callStatus === 'active') {
+            const newMutedState = !isMuted;
+            vapi.setMuted(newMutedState);
+            setIsMuted(newMutedState);
+            console.log(`Microphone ${newMutedState ? 'muted' : 'unmuted'}`);
         }
     };
 
@@ -464,7 +455,7 @@ export default function ChatInterface() {
                             <div className="flex items-center space-x-3">
                                 <div className="flex items-center">
                                     <Waveform
-                                        isActive={callStatus === 'active'}
+                                        isActive={callStatus === 'active' && !isMuted}
                                         width={120}
                                         height={40}
                                     />
@@ -485,8 +476,37 @@ export default function ChatInterface() {
                                 </div>
                             </div>
 
-                            {/* Right Side - Microphone Button */}
-                            <button
+                            {/* Right Side - Mute and Microphone Buttons */}
+                            <div className="flex items-center space-x-3">
+                                {/* Mute Button - only show when call is active */}
+                                {callStatus === 'active' && (
+                                    <button
+                                        type="button"
+                                        onClick={handleMuteToggle}
+                                        className={`p-3 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-offset-2 ${isMuted
+                                            ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 focus:ring-red-300 text-white'
+                                            : 'bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 focus:ring-gray-300 text-white'
+                                            }`}
+                                        aria-label={isMuted ? 'Unmute microphone' : 'Mute microphone'}
+                                    >
+                                        {isMuted ? (
+                                            // Muted icon
+                                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M16.5 12A4.5 4.5 0 0 0 12 7.5v.75m0 6v.75a4.5 4.5 0 0 1-4.5-4.5V12m0 0v.75a5.25 5.25 0 0 0 10.5 0V12m-9-7.5h7.5M12 18.75V22.5m-6-3.75h12" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636 5.636 18.364" />
+                                            </svg>
+                                        ) : (
+                                            // Unmuted icon
+                                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z" />
+                                                <path d="M19 10v1a7 7 0 0 1-14 0v-1h2v1a5 5 0 0 0 10 0v-1h2z" />
+                                            </svg>
+                                        )}
+                                    </button>
+                                )}
+
+                                {/* Microphone Button */}
+                                <button
                                 type="button"
                                 onClick={handleMicToggle}
                                 disabled={isConnecting}
@@ -519,6 +539,7 @@ export default function ChatInterface() {
                                     )}
                                 </div>
                             </button>
+                            </div>
                         </div>
                     </form>
                 </div>
