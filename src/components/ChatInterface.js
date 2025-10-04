@@ -2,16 +2,27 @@
 
 import Vapi from '@vapi-ai/web';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Waveform from './Waveform';
 import SoundWaveform from './SoundWaveForm';
 
 export default function ChatInterface() {
+    const router = useRouter();
     const [isMicOn, setIsMicOn] = useState(false);
     const [isConnecting, setIsConnecting] = useState(false);
     const [callStatus, setCallStatus] = useState('inactive'); // 'inactive', 'connecting', 'active', 'ended'
     const [isMuted, setIsMuted] = useState(false);
     const [vapi, setVapi] = useState(null);
     const [textInput, setTextInput] = useState('');
+    const [callId, setCallId] = useState(null);
+    const [messageIdCounter, setMessageIdCounter] = useState(2); // Start from 2 since initial message has id 1
+
+    // Helper function to generate unique message ID
+    const generateMessageId = () => {
+        const newId = messageIdCounter;
+        setMessageIdCounter(prev => prev + 1);
+        return newId;
+    };
     const [messages, setMessages] = useState([
         {
             id: 1,
@@ -20,6 +31,8 @@ export default function ChatInterface() {
             type: 'ai'
         }
     ]);
+
+    const privateKey = "00ad2e7c-1cde-4b39-867a-7570d3579307"
 
     // Auto-scroll to bottom when new messages arrive
     useEffect(() => {
@@ -32,7 +45,7 @@ export default function ChatInterface() {
 
     // Initialize VAPI
     useEffect(() => {
-        const vapiInstance = new Vapi("388af15d-d8d5-4f25-ae08-9bf68bc8bbdb");
+        const vapiInstance = new Vapi("83d4b302-f1d6-418f-85a8-a814890e6b8d");
         setVapi(vapiInstance);
 
         // Set up event listeners
@@ -69,11 +82,24 @@ export default function ChatInterface() {
                 if (message.role === 'user') {
                     updateLastMessage(message.transcript, 'user');
                 } else if (message.role === 'assistant') {
-                    // Instead of adding a new message, update the last AI message
                     updateLastAIMessage(message.transcript);
+
+                    // 🔹 Detect closing phrase from AI
+                    if (message.transcript.toLowerCase().includes("assessment completed")) {
+                        addMessage("✅ The assessment is now complete. Thank you for your participation!", "system");
+
+                        // Gracefully end the call and navigate to summary
+                        setTimeout(() => {
+                            vapiInstance.stop();
+                            setCallStatus("ended");
+                            setIsMicOn(false);
+                            setIsConnecting(false);
+                        }, 2000);
+                    }
                 }
             }
         });
+
 
         vapiInstance.on('error', (error) => {
             console.error('VAPI Error:', error);
@@ -101,9 +127,23 @@ export default function ChatInterface() {
         };
     }, []);
 
+    // Separate useEffect to handle navigation when call ends
+    useEffect(() => {
+        console.log('Navigation effect triggered - callStatus:', callStatus, 'callId:', callId);
+        if (callStatus === 'ended' && callId) {
+            console.log('Navigation conditions met - callStatus:', callStatus, 'callId:', callId);
+            const timer = setTimeout(() => {
+                console.log('Navigating to summary page with call ID:', callId);
+                router.push(`/chat/summary/${callId}`);
+            }, 1500); // Small delay to ensure the "ended" message is visible
+
+            return () => clearTimeout(timer);
+        }
+    }, [callStatus, callId, router]);
+
     const addMessage = (text, type) => {
         const newMessage = {
-            id: Date.now(),
+            id: generateMessageId(),
             text,
             timestamp: new Date(),
             type
@@ -123,7 +163,7 @@ export default function ChatInterface() {
                 };
             } else {
                 messages.push({
-                    id: Date.now(),
+                    id: generateMessageId(),
                     text,
                     timestamp: new Date(),
                     type
@@ -143,7 +183,7 @@ export default function ChatInterface() {
 
             // Add the new AI message with the actual transcript
             filteredMessages.push({
-                id: Date.now(),
+                id: generateMessageId(),
                 text: text,
                 timestamp: new Date(),
                 type: 'ai'
@@ -233,26 +273,9 @@ Please feel free to speak in English or Hindi, and I’ll continue in the same l
 
 # Questions
 [
-  { "id": 1, "text": "If you point at something across the room—say a toy or an animal—does Elon look at it?", "order_index": 1 },
-  { "id": 2, "text": "Have you ever wondered if Elon might be deaf?", "order_index": 2 },
-  { "id": 3, "text": "Does Elon engage in pretend or make-believe play? For example, pretending to drink from an empty cup or feeding a doll.", "order_index": 3 },
-  { "id": 4, "text": "Does Elon like climbing on things—furniture, playground equipment, or stairs?", "order_index": 4 },
-  { "id": 5, "text": "Does Elon make unusual finger movements near their eyes—like wiggling fingers close to their face?", "order_index": 5 },
-  { "id": 6, "text": "Does Elon point with one finger to ask for something or get help—like pointing to a snack out of reach?", "order_index": 6 },
-  { "id": 7, "text": "Does Elon point with one finger to show you something interesting—like an airplane or big truck?", "order_index": 7 },
-  { "id": 8, "text": "Is Elon interested in other children—watching them, smiling at them, or going to them?", "order_index": 8 },
-  { "id": 9, "text": "Does Elon ever bring something to you or hold it up for you just to share—not because they need help?", "order_index": 9 },
-  { "id": 10, "text": "When you call Elon’s name, do they respond—by looking up, babbling, or stopping what they're doing?", "order_index": 10 },
-  { "id": 11, "text": "When you smile at Elon, do they smile back at you?", "order_index": 11 },
-  { "id": 12, "text": "Does Elon get upset by everyday noises—like a vacuum cleaner or loud music?", "order_index": 12 },
-  { "id": 13, "text": "Does Elon walk?", "order_index": 13 },
-  { "id": 14, "text": "Does Elon look you in the eye when you're talking to them, playing with them, or dressing them?", "order_index": 14 },
-  { "id": 15, "text": "Does Elon try to copy what you do—like waving bye-bye, clapping, or making funny noises?", "order_index": 15 },
-  { "id": 16, "text": "If you turn your head to look at something, does Elon follow your gaze and look around at what you're looking at?", "order_index": 16 },
-  { "id": 17, "text": "Does Elon try to get you to watch them—looking at you for praise or saying 'look' or 'watch me'?", "order_index": 17 },
-  { "id": 18, "text": "Does Elon understand when you tell them to do something without pointing—like 'put the book on the chair'?", "order_index": 18 },
-  { "id": 19, "text": "If something new happens, does Elon look at your face to see how you feel about it—like hearing a strange noise?", "order_index": 19 },
-  { "id": 20, "text": "Does Elon like movement activities—being swung or bounced on your knee?", "order_index": 20 }
+  { "id": 1, "text": "What is elon's age ?", "order_index": 1 },
+  { "id": 2, "text": "Does Elon try to copy what you do—like waving bye-bye, clapping, or making funny noises?", "order_index": 2 }
+   //only this much
 ]
 
 # Behavior during the conversation
@@ -265,6 +288,10 @@ Please feel free to speak in English or Hindi, and I’ll continue in the same l
 # Closing
 Once all questions are answered, thank the parent warmly for their openness and time.  
 End with a message of gentle reassurance, encouraging them to keep nurturing and observing their child’s progress lovingly.
+Finally, say exactly this phrase to signal the end of the session:
+"Assessment completed. Thank you for your time."
+
+(Do not continue the conversation after saying this.)
 `
                         }
                     ],
@@ -274,7 +301,14 @@ End with a message of gentle reassurance, encouraging them to keep nurturing and
 
             };
 
-            await vapi.start(assistant);
+            const callResponse = await vapi.start(assistant);
+            console.log('Call started successfully:', callResponse);
+
+            // Store the call ID for navigation
+            if (callResponse && callResponse.id) {
+                setCallId(callResponse.id);
+                console.log('Call ID stored:', callResponse.id);
+            }
 
         } catch (error) {
             console.error('Failed to start call:', error);
