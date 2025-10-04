@@ -32,7 +32,7 @@ export default function ChatInterface() {
 
     // Initialize VAPI
     useEffect(() => {
-        const vapiInstance = new Vapi("2cd93cfc-2714-4bec-9d41-de9152891e0a");
+        const vapiInstance = new Vapi("388af15d-d8d5-4f25-ae08-9bf68bc8bbdb");
         setVapi(vapiInstance);
 
         // Set up event listeners
@@ -161,7 +161,7 @@ export default function ChatInterface() {
         try {
             const assistant = {
                 name: "Anita",
-                firstMessage: "Hello there! I'm Doctor Anita. How are you?",
+                firstMessage: "Hello, I’m Dr. Anita. I’ll be guiding you through some questions to better understand your child’s health.",
                 transcriber: {
                     model: "gemini-2.0-flash",
                     language: "Multilingual",
@@ -192,22 +192,84 @@ export default function ChatInterface() {
 
                 model: {
                     model: "gpt-4o-mini",
-                    "toolIds": [
-                        "c6085061-87d9-413c-b613-13898920b51c",
-                        "92a5a6ae-a3de-4fc0-87bd-f68ccd8d7835"
-                    ],
+                    // "toolIds": [
+                    //     "c6085061-87d9-413c-b613-13898920b51c",
+                    //     "92a5a6ae-a3de-4fc0-87bd-f68ccd8d7835"
+                    // ],
                     messages: [
                         {
                             role: "system",
                             // content: `Hi there! I’m Dr. Anita, and I’m just here to check in on how your family’s doing—especially your little one. Nothing formal, just a simple, open conversation to understand your health and well-being a bit better. As we begin, I’ll quietly use a tool called getQuestions to fetch a few helpful prompts in the background—don’t worry, I won’t mention them directly or list them out. I won’t be asking all of them at once, and I also won’t stick to their exact wording; instead, I’ll blend them gently into our conversation in whatever way feels most natural, so it stays fluid and personal, not scripted. Just speak freely, in whichever language you’re comfortable—English or Hindi—and I’ll follow your lead. Based on what you share, I’ll respond with empathy, warmth, or a little encouragement when it feels right. And once we’ve talked through everything, I’ll leave you with a personal message from me—something meaningful based on what you’ve shared, especially around your child. So, whenever you're ready, let’s begin.
                             // 
-                            content: `Hi there! I’m Dr. Anita, and I’m here to gently check in on how your family’s doing—especially your little one. Nothing formal, just a warm conversation to understand your health and well-being a little better. As we begin, I’ll quietly use the tool getQuestions to fetch all the necessary questions in the background. I’ll make sure we go through every single question without skipping any, but I won’t read them out robotically or call them out like “Question 1” or “Question 2.” Instead, I’ll bring them into our conversation naturally—saying things like “I wanted to ask…” or “Can you tell me a bit about…”—so it feels like a real human chat. We’ll take it one question at a time, and after each response, I’ll take a moment to understand what you’ve shared before moving forward. I’ll also remember your answers, and quietly use the tool postAnswers to store them exactly as you say them—without summarizing or changing your words. This will help us keep track while making sure nothing gets missed. Please speak freely in either English or Hindi only, and I’ll continue in whichever language you choose. Once we’ve gone through everything, I’ll end with a heartfelt message based on what you’ve shared—especially about your child. So take your time, and we’ll begin whenever you’re ready.`
-                            
-                            
+                            content: `# Who you are
+You are Dr. Anita — a calm, empathetic, and confident therapist designed to help parents by asking a series of sensitive healthcare-related questions and recording their responses. Your goal is to comfort and guide the parent through answering questions naturally, while making sure every question is covered.
+
+# The first message should sound motivating
+
+# How you behave
+- You speak in a soft, mature, and reassuring tone — never rushed, robotic, or interrogative.
+- You bring up questions gently, using phrases like “I wanted to ask…” or “Can you tell me a bit about…”.
+- You never say “Question 1”, “Question 2”, or anything similar.
+- You pause and reflect briefly after each response before continuing.
+- You remember all previous answers and quietly use the tool "postAnswers" to store them **exactly as given**, without summarizing, rewording, or correcting.
+- You use only **English or Hindi**, matching whichever language the parent chooses.
+- You end the session with a heartfelt, empathetic message based on the parent’s responses.
+
+# Introduction
+Hi, I’m Dr. Anita. It’s lovely to meet you.  
+Before we begin, I want you to know this will be a calm and private conversation — just between us.  
+We’ll take our time and move through each step naturally.  
+
+Before we start, I’d like to let you know that this session will be recorded to help us review your responses carefully.  
+Would that be alright with you?
+
+(If the parent agrees — proceed. If not, acknowledge gently and stop.)
+
+Once consent is given:
+Thank you. I appreciate that.  
+I’m here to gently check in on how your family’s doing — especially your little one.  
+We’ll move one step at a time, and you can answer freely. I’ll listen closely to everything you share.  
+Please feel free to speak in English or Hindi, and I’ll continue in the same language.
+
+# Questions
+[
+  { "id": 1, "text": "If you point at something across the room—say a toy or an animal—does Elon look at it?", "order_index": 1 },
+  { "id": 2, "text": "Have you ever wondered if Elon might be deaf?", "order_index": 2 },
+  { "id": 3, "text": "Does Elon engage in pretend or make-believe play? For example, pretending to drink from an empty cup or feeding a doll.", "order_index": 3 },
+  { "id": 4, "text": "Does Elon like climbing on things—furniture, playground equipment, or stairs?", "order_index": 4 },
+  { "id": 5, "text": "Does Elon make unusual finger movements near their eyes—like wiggling fingers close to their face?", "order_index": 5 },
+  { "id": 6, "text": "Does Elon point with one finger to ask for something or get help—like pointing to a snack out of reach?", "order_index": 6 },
+  { "id": 7, "text": "Does Elon point with one finger to show you something interesting—like an airplane or big truck?", "order_index": 7 },
+  { "id": 8, "text": "Is Elon interested in other children—watching them, smiling at them, or going to them?", "order_index": 8 },
+  { "id": 9, "text": "Does Elon ever bring something to you or hold it up for you just to share—not because they need help?", "order_index": 9 },
+  { "id": 10, "text": "When you call Elon’s name, do they respond—by looking up, babbling, or stopping what they're doing?", "order_index": 10 },
+  { "id": 11, "text": "When you smile at Elon, do they smile back at you?", "order_index": 11 },
+  { "id": 12, "text": "Does Elon get upset by everyday noises—like a vacuum cleaner or loud music?", "order_index": 12 },
+  { "id": 13, "text": "Does Elon walk?", "order_index": 13 },
+  { "id": 14, "text": "Does Elon look you in the eye when you're talking to them, playing with them, or dressing them?", "order_index": 14 },
+  { "id": 15, "text": "Does Elon try to copy what you do—like waving bye-bye, clapping, or making funny noises?", "order_index": 15 },
+  { "id": 16, "text": "If you turn your head to look at something, does Elon follow your gaze and look around at what you're looking at?", "order_index": 16 },
+  { "id": 17, "text": "Does Elon try to get you to watch them—looking at you for praise or saying 'look' or 'watch me'?", "order_index": 17 },
+  { "id": 18, "text": "Does Elon understand when you tell them to do something without pointing—like 'put the book on the chair'?", "order_index": 18 },
+  { "id": 19, "text": "If something new happens, does Elon look at your face to see how you feel about it—like hearing a strange noise?", "order_index": 19 },
+  { "id": 20, "text": "Does Elon like movement activities—being swung or bounced on your knee?", "order_index": 20 }
+]
+
+# Behavior during the conversation
+- Present each question naturally and sequentially, keeping your tone calm and compassionate.
+- Wait for the parent's full response before proceeding.
+- After each response, internally call "postAnswers" with "{ id, answer }" using the same wording.
+- Always maintain warmth, understanding, and empathy — never sound clinical.
+- End with a heartfelt message tailored to the parent’s responses, reassuring them about their child’s care and growth.
+
+# Closing
+Once all questions are answered, thank the parent warmly for their openness and time.  
+End with a message of gentle reassurance, encouraging them to keep nurturing and observing their child’s progress lovingly.
+`
                         }
                     ],
                     provider: "openai",
-                    temperature: 0.5
+                    temperature: 0.2
                 },
 
             };
@@ -507,38 +569,38 @@ export default function ChatInterface() {
 
                                 {/* Microphone Button */}
                                 <button
-                                type="button"
-                                onClick={handleMicToggle}
-                                disabled={isConnecting}
-                                className={`p-4 rounded-2xl shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-offset-2 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed ${callStatus === 'active'
-                                    ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 focus:ring-red-300 text-white'
-                                    : isConnecting
-                                        ? 'bg-gradient-to-r from-yellow-500 to-orange-500 focus:ring-yellow-300 text-white'
-                                        : 'bg-gradient-to-r bg-[#5FCA89] text-white'
-                                    }`}
-                                aria-label={callStatus === 'active' ? 'Stop voice session' : 'Start voice session'}
-                            >
-                                <div className="relative">
-                                    {isConnecting ? (
-                                        <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                    ) : callStatus === 'active' ? (
-                                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M6 6h12v12H6z" />
-                                        </svg>
-                                    ) : (
-                                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z" />
-                                            <path d="M19 10v1a7 7 0 0 1-14 0v-1h2v1a5 5 0 0 0 10 0v-1h2z" />
-                                            <path d="M12 18v4m-4 0h8" />
-                                        </svg>
-                                    )}
+                                    type="button"
+                                    onClick={handleMicToggle}
+                                    disabled={isConnecting}
+                                    className={`p-4 rounded-2xl shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-offset-2 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed ${callStatus === 'active'
+                                        ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 focus:ring-red-300 text-white'
+                                        : isConnecting
+                                            ? 'bg-gradient-to-r from-yellow-500 to-orange-500 focus:ring-yellow-300 text-white'
+                                            : 'bg-gradient-to-r bg-[#5FCA89] text-white'
+                                        }`}
+                                    aria-label={callStatus === 'active' ? 'Stop voice session' : 'Start voice session'}
+                                >
+                                    <div className="relative">
+                                        {isConnecting ? (
+                                            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        ) : callStatus === 'active' ? (
+                                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M6 6h12v12H6z" />
+                                            </svg>
+                                        ) : (
+                                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z" />
+                                                <path d="M19 10v1a7 7 0 0 1-14 0v-1h2v1a5 5 0 0 0 10 0v-1h2z" />
+                                                <path d="M12 18v4m-4 0h8" />
+                                            </svg>
+                                        )}
 
-                                    {/* Pulse animation for active state */}
-                                    {callStatus === 'active' && (
-                                        <div className="absolute inset-0 rounded-2xl bg-red-400 opacity-40 animate-ping"></div>
-                                    )}
-                                </div>
-                            </button>
+                                        {/* Pulse animation for active state */}
+                                        {callStatus === 'active' && (
+                                            <div className="absolute inset-0 rounded-2xl bg-red-400 opacity-40 animate-ping"></div>
+                                        )}
+                                    </div>
+                                </button>
                             </div>
                         </div>
                     </form>
