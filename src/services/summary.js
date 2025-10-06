@@ -7,30 +7,68 @@ const NBT_BACKEND_API = 'https://nbt-backend.vercel.app/api/conversation';
 const BEARER_TOKEN = '00ad2e7c-1cde-4b39-867a-7570d3579307';
 
 /**
- * Fetch call data from Vapi API
+ * Sleep function for retry delays
+ * @param {number} ms - Milliseconds to sleep
+ * @returns {Promise}
+ */
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Fetch call data from Vapi API with retry mechanism
  * @param {string} callId - The ID of the call to fetch
+ * @param {number} maxRetries - Maximum number of retry attempts (default: 5)
+ * @param {number} baseDelay - Base delay in milliseconds (default: 2000)
  * @returns {Promise<Object>} Call data from Vapi API
  */
-export async function fetchCallData(callId) {
-  try {
-    const response = await fetch(`${VAPI_API_BASE}/call/${callId}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${BEARER_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
-    });
+export async function fetchCallData(callId, maxRetries = 5, baseDelay = 2000) {
+  let lastError;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`Fetching call data for ${callId}, attempt ${attempt}/${maxRetries}`);
+      
+      const response = await fetch(`${VAPI_API_BASE}/call/${callId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${BEARER_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+      });
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch call data: ${response.status} ${response.statusText}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch call data: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      // Check if messages array exists and has content
+      if (!data.messages || data.messages.length === 0) {
+        throw new Error('No messages found in call data - call may still be processing');
+      }
+      
+      console.log(`Successfully fetched call data with ${data.messages.length} messages`);
+      return data;
+      
+    } catch (error) {
+      console.error(`Attempt ${attempt} failed:`, error.message);
+      lastError = error;
+      
+      // If this is the last attempt, don't wait
+      if (attempt === maxRetries) {
+        break;
+      }
+      
+      // Exponential backoff: wait longer between retries
+      const delay = baseDelay * Math.pow(1.5, attempt - 1);
+      console.log(`Waiting ${delay}ms before retry...`);
+      await sleep(delay);
     }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching call data:', error);
-    throw error;
   }
+  
+  console.error('All retry attempts failed');
+  throw lastError;
 }
 
 /**
@@ -67,19 +105,19 @@ export async function processConversation(messages) {
  */
 export async function getCallSummary(callId) {
   try {
-    // Step 1: Fetch call data from Vapi API
+    console.log(`Starting call summary process for call ID: ${callId}`);
+    
+    // Step 1: Fetch call data from Vapi API with retry mechanism
     const callData = await fetchCallData(callId);
     
-    // Step 2: Extract messages array
-    const messages = callData.messages || [];
-    
-    if (messages.length === 0) {
-      throw new Error('No messages found in call data');
-    }
+    // Step 2: Extract messages array (already validated in fetchCallData)
+    const messages = callData.messages;
+    console.log(`Processing ${messages.length} messages`);
 
     // Step 3: Process messages with NBT backend
     const processedData = await processConversation(messages);
     
+    console.log('Call summary completed successfully');
     return {
       success: true,
       callData,
