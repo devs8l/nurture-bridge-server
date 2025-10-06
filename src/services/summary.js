@@ -4,6 +4,7 @@
 
 const VAPI_API_BASE = 'https://api.vapi.ai';
 const NBT_BACKEND_API = 'https://nbt-backend.vercel.app/api/conversation';
+const NBT_TEXT_API = 'https://nbt-backend.vercel.app/api/text';
 const BEARER_TOKEN = '00ad2e7c-1cde-4b39-867a-7570d3579307';
 
 /**
@@ -99,6 +100,36 @@ export async function processConversation(messages) {
 }
 
 /**
+ * Process text with NBT backend text API
+ * @param {string} text - The text to process
+ * @returns {Promise<Object>} Processed text response
+ */
+export async function processText(text) {
+  try {
+    console.log('Processing text with NBT backend...');
+    
+    const response = await fetch(NBT_TEXT_API, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ text }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to process text: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log('Text processing completed successfully');
+    return data;
+  } catch (error) {
+    console.error('Error processing text:', error);
+    throw error;
+  }
+}
+
+/**
  * Get complete call summary by fetching call data and processing it
  * @param {string} callId - The ID of the call to summarize
  * @returns {Promise<Object>} Complete summary with chat segregation and questions mapping
@@ -133,3 +164,8 @@ export async function getCallSummary(callId) {
     };
   }
 }
+
+
+
+
+
