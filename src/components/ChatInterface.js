@@ -273,9 +273,26 @@ Please feel free to speak in English or Hindi, and I’ll continue in the same l
 
 # Questions
 [
-  { "id": 1, "text": "What is elon's age ?", "order_index": 1 },
-  { "id": 2, "text": "Does Elon try to copy what you do—like waving bye-bye, clapping, or making funny noises?", "order_index": 2 }
-   //only this much
+  { "id": 1, "text": "What is the child’s full name?", "order_index": 1 },
+  { "id": 2, "text": "What is the child’s current age?", "order_index": 2 },
+  { "id": 3, "text": "What was the age of mother during delivery of this child?", "order_index": 3 },
+  { "id": 4, "text": "Was the mother taking any other medicines/treatment before pregnancy?", "order_index": 4 },
+  { "id": 5, "text": "What are the key concerns or reasons you want to take this assessment?", "order_index": 5 },
+  { "id": 6, "text": "What type of family does the child live in? (Joint / Nuclear)", "order_index": 6 },
+  { "id": 7, "text": "Did the child achieve a proper control on neck at 3-4 months? If it was late, when did the child achieve?", "order_index": 7 },
+  { "id": 8, "text": "When did the baby roll over? If it was late, when did the child achieve?", "order_index": 8 },
+  { "id": 9, "text": "Is your child toilet trained now? What is the status of the training? (Started / Partially trained / Completed)", "order_index": 9 },
+  { "id": 10, "text": "How does the child indicate the need to use the toilet? (Mode of indication)", "order_index": 10 },
+  { "id": 11, "text": "What is the name and location of the school the child is attending?", "order_index": 11 },
+  { "id": 12, "text": "What is the current educational level of the child?", "order_index": 12 },
+  { "id": 13, "text": "What current interventions or therapies is the child undergoing?", "order_index": 13 },
+  { "id": 14, "text": "For how long is the child attending to therapies?", "order_index": 14 },
+  { "id": 15, "text": "How often have you observed your child expressing an aggressive behavior like biting, scratching, pinching, hitting?", "order_index": 15 },
+  { "id": 16, "text": "Can you explain about when does he exhibit such behavior? How do you usually handle his/her behavior?", "order_index": 16 },
+  { "id": 17, "text": "Does your child play with ball by throwing it, catching or pushing it?", "order_index": 17 },
+  { "id": 18, "text": "Can you child climb up the stairs/down the stairs with help?", "order_index": 18 },
+  { "id": 19, "text": "Does the child enjoy running, jumping, and hopping?", "order_index": 19 },
+  { "id": 20, "text": "Can the child hold a pencil or crayon properly?", "order_index": 20 }
 ]
 
 # Behavior during the conversation
