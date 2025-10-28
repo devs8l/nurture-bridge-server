@@ -41,7 +41,15 @@ export default function ChatInterface() {
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
     }, [messages]);
-    const [childName, setChildName] = useState('titu'); // Default name
+    const [childName, setChildName] = useState(''); // Will be loaded from localStorage
+
+    // Load child name from localStorage
+    useEffect(() => {
+        const storedName = localStorage.getItem('childName');
+        if (storedName) {
+            setChildName(storedName);
+        }
+    }, []);
 
     // Initialize VAPI
     useEffect(() => {
@@ -298,8 +306,8 @@ Please feel free to speak in English or Hindi, and I’ll continue in the same l
 # Behavior during the conversation
 - Present each question naturally and sequentially, keeping your tone calm and compassionate.
 - Wait for the parent's full response before proceeding.
-- After each response, internally call "postAnswers" with "{ id, answer }" using the same wording.
 - Always maintain warmth, understanding, and empathy — never sound clinical.
+- If parent asks to switch to Hindi or English (No Other language,if asked say "Sorry, I can't assist with that Language."), respond in that language from that point onward.
 - End with a heartfelt message tailored to the parent’s responses, reassuring them about their child’s care and growth.
 
 # Closing
@@ -471,17 +479,10 @@ Finally, say exactly this phrase to signal the end of the session:
     };
 
     return (
-        <div className="h-screen bg-gradient-to-br bg-white flex items-center justify-center p-4 relative">
+        <div className="h-screen bg-gradient-to-br bg-white flex items-center justify-center  relative">
             {/* Main Assessment Interface */}
-            <div className="bg-[#F5FAFC] rounded-2xl w-full shadow-2xl p-1 border h-full border-gray-100 overflow-hidden pb-24">
-                {/* Assessment Header */}
-                <div className="bg-gradient-to-r bg-[#E2EAE7] text-white px-8 py-6 rounded-t-2xl">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h2 className="text-sm text-[#222836] hanken">First year Journey of the child and family</h2>
-                        </div>
-                    </div>
-                </div>
+            <div className=" rounded-2xl w-full  h-full  overflow-hidden pb-24">
+                
 
                 {/* Messages Area with Enhanced Styling and Auto-scroll */}
                 <div id="messages-container" className="h-full w-[95%] mx-auto alliance  overflow-y-auto  scroll-smooth">
@@ -493,16 +494,29 @@ Finally, say exactly this phrase to signal the end of the session:
                             >
                                 <div className={`flex flex-col max-w-xs lg:max-w-2xl ${message.type === 'user' ? 'items-end' : 'items-start'}`}>
                                     {/* Enhanced Message Bubble */}
-                                    <div className={`relative px-6 py-4 rounded-2xl  transition-all duration-300 hover:shadow-lg `}>
-
-                                        {/* Message Content */}
-                                        {message.text === 'speaking' ? (
-                                            <div className="flex items-center space-x-2">
-                                                <SoundWaveform />
+                                    <div className={`relative px-6 py-4 rounded-2xl  transition-all duration-300  flex items-start gap-4`}>
+                                        
+                                        {/* Female Avatar for AI messages */}
+                                        {message.type === 'ai' && (
+                                            <div className="flex-shrink-0">
+                                                <img 
+                                                    src="/female.svg" 
+                                                    alt="AI Assistant" 
+                                                    className="w-11 h-11 rounded-full"
+                                                />
                                             </div>
-                                        ) : (
-                                            <p className="text-[#222836] alliance text-[28px] font-normal leading-[40px] tracking-[-0.56px]">{message.text}</p>
                                         )}
+                                        
+                                        {/* Message Content */}
+                                        <div className="flex-1">
+                                            {message.text === 'speaking' ? (
+                                                <div className="flex items-center space-x-2">
+                                                    <SoundWaveform />
+                                                </div>
+                                            ) : (
+                                                <p className="text-[#222836] alliance text-[28px] font-normal leading-[40px] tracking-[-0.56px]">{message.text}</p>
+                                            )}
+                                        </div>
 
                                     </div>
                                     {/* Enhanced Timestamp */}

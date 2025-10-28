@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import BoxLoader from './BoxLoader';
 import { processText } from '../services/summary';
 
 export default function ConversationSummary({ summaryData, loading }) {
+    const router = useRouter();
     const [expandedQuestions, setExpandedQuestions] = useState({});
     const [editingAnswers, setEditingAnswers] = useState({});
     const [editedAnswers, setEditedAnswers] = useState({});
@@ -168,6 +170,14 @@ export default function ConversationSummary({ summaryData, loading }) {
         return currentDisplayText !== questionsMapping[index].userResponse;
     };
 
+    const handleCompleteAssessment = () => {
+        // Save assessment completion status
+        localStorage.setItem('lastAssessmentCompleted', Date.now().toString());
+        
+        // Navigate to dashboard
+        router.push('/dashboard');
+    };
+
     return (
         <div className="bg-[#F5FAFC] rounded-2xl w-full shadow-2xl p-1 border h-full border-gray-100 overflow-hidden pb-24">
             {/* Assessment Header */}
@@ -290,6 +300,16 @@ export default function ConversationSummary({ summaryData, loading }) {
                             </div>
                         </div>
                     ))}
+                </div>
+                
+                {/* Complete Assessment Button */}
+                <div className="px-6 pb-6">
+                    <button
+                        onClick={handleCompleteAssessment}
+                        className="w-full bg-[#5C756B] hover:bg-[#4a6459] text-white font-semibold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 hanken text-lg"
+                    >
+                        Complete Assessment
+                    </button>
                 </div>
             </div>
         </div>
