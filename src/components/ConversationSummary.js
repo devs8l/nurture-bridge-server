@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import BoxLoader from './BoxLoader';
 import { processText } from '../services/summary';
 
@@ -268,10 +269,11 @@ export default function ConversationSummary({ summaryData, loading }) {
                                             onClick={() => toggleEditAnswer(index)}
                                             className="text-[#5C756B] cursor-pointer bg-[#E3EEEC] hover:bg-[#d7e6e1] p-2 rounded-md hanken gap-2 flex items-center transition-all duration-200"
                                         >
-                                            <img
+                                            <Image
                                                 src="/edit.svg"
-                                                className=""
-                                                alt=""
+                                                alt="Edit"
+                                                width={16}
+                                                height={16}
                                             />
                                             {editingAnswers[index] ? 'Cancel Edit' : 'Edit Answer'}
                                         </button>

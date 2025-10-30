@@ -67,7 +67,7 @@ const OnboardingPage = () => {
         <div className="  p-8 w-full max-w-md mx-auto">
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-gray-800 hanken mb-2">
-              01 What is the child's full name?
+              01 What is the child&apos;s full name?
             </h2>
           </div>
 

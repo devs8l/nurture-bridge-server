@@ -1,8 +1,9 @@
 'use client';
 
 import Vapi from '@vapi-ai/web';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import Waveform from './Waveform';
 import SoundWaveform from './SoundWaveForm';
 
@@ -133,7 +134,7 @@ export default function ChatInterface() {
                 vapiInstance.stop();
             }
         };
-    }, []);
+    }, [addMessage, updateLastAIMessage, updateLastMessage]);
 
     // Separate useEffect to handle navigation when call ends
     useEffect(() => {
@@ -149,7 +150,7 @@ export default function ChatInterface() {
         }
     }, [callStatus, callId, router]);
 
-    const addMessage = (text, type) => {
+    const addMessage = useCallback((text, type) => {
         const newMessage = {
             id: generateMessageId(),
             text,
@@ -157,9 +158,9 @@ export default function ChatInterface() {
             type
         };
         setMessages(prev => [...prev, newMessage]);
-    };
+    }, [generateMessageId]);
 
-    const updateLastMessage = (text, type) => {
+    const updateLastMessage = useCallback((text, type) => {
         setMessages(prev => {
             const messages = [...prev];
             const lastMessage = messages[messages.length - 1];
@@ -179,8 +180,9 @@ export default function ChatInterface() {
             }
             return messages;
         });
-    };
-    const updateLastAIMessage = (text) => {
+    }, [generateMessageId]);
+
+    const updateLastAIMessage = useCallback((text) => {
         setMessages(prev => {
             const messages = [...prev];
 
@@ -199,7 +201,7 @@ export default function ChatInterface() {
 
             return filteredMessages;
         });
-    };
+    }, [generateMessageId]);
     const startCall = async () => {
         if (!vapi) return;
 
@@ -499,10 +501,12 @@ Finally, say exactly this phrase to signal the end of the session:
                                         {/* Female Avatar for AI messages */}
                                         {message.type === 'ai' && (
                                             <div className="flex-shrink-0">
-                                                <img 
+                                                <Image 
                                                     src="/female.svg" 
                                                     alt="AI Assistant" 
-                                                    className="w-11 h-11 rounded-full"
+                                                    width={32}
+                                                    height={32}
+                                                    className="w-8 h-8 rounded-full"
                                                 />
                                             </div>
                                         )}
