@@ -32,7 +32,7 @@ export default function ChatInterface() {
         }
     ]);
 
-    const privateKey = "00ad2e7c-1cde-4b39-867a-7570d3579307"
+    const privateKey = "9929210d-c21b-4616-a816-e7c5caef6d5b"
 
     // Auto-scroll to bottom when new messages arrive
     useEffect(() => {
@@ -53,7 +53,7 @@ export default function ChatInterface() {
 
     // Initialize VAPI
     useEffect(() => {
-        const vapiInstance = new Vapi("83d4b302-f1d6-418f-85a8-a814890e6b8d");
+        const vapiInstance = new Vapi("5414e0b9-021c-4c09-83f5-10a46f23ecef");
         setVapi(vapiInstance);
 
         // Set up event listeners
