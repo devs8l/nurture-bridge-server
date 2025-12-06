@@ -1,13 +1,25 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 const DashboardPage = () => {
+  const router = useRouter();
+  const [isAuthorized, setIsAuthorized] = useState(false);
   const [childName, setChildName] = useState('');
   const [assessmentHistory, setAssessmentHistory] = useState([]);
 
   useEffect(() => {
+    // Check if user has completed onboarding
+    const hasCompletedOnboarding = localStorage.getItem('hasCompletedOnboarding');
+    if (hasCompletedOnboarding !== 'true') {
+      router.push('/onboarding');
+      return;
+    }
+
+    setIsAuthorized(true);
+
     // Get child name from localStorage
     const name = localStorage.getItem('childName');
     if (name) {
@@ -24,7 +36,11 @@ const DashboardPage = () => {
       }
     ];
     setAssessmentHistory(mockHistory);
-  }, []);
+  }, [router]);
+
+  if (!isAuthorized) {
+    return null;
+  }
 
   return (
     <div className="min-h-full bg-gradient-to-br from-blue-50 to-purple-50 p-8">

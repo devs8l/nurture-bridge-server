@@ -11,8 +11,8 @@ const HomePage = () => {
     const hasCompletedOnboarding = localStorage.getItem('hasCompletedOnboarding');
     
     if (hasCompletedOnboarding === 'true') {
-      // User has completed onboarding, redirect to dashboard
-      router.push('/dashboard');
+      // User has completed onboarding, redirect to chat
+      router.push('/chat');
     } else {
       // User hasn't completed onboarding, redirect to onboarding
       router.push('/onboarding');

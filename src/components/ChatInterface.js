@@ -24,12 +24,7 @@ export default function ChatInterface() {
         return newId;
     };
     const [messages, setMessages] = useState([
-        {
-            id: 1,
-            text: "Welcome to the M-CHAT-R screening assessment. I'm here to help evaluate your child's development through a few simple questions. You can speak using the microphone or type your responses.",
-            timestamp: new Date(),
-            type: 'ai'
-        }
+
     ]);
 
     const privateKey = "00ad2e7c-1cde-4b39-867a-7570d3579307"
@@ -420,253 +415,186 @@ Finally, say exactly this phrase to signal the end of the session:
         }
     };
 
-    const getStatusText = () => {
-        switch (callStatus) {
-            case 'connecting':
-                return 'Connecting...';
-            case 'active':
-                return 'In Call';
-            case 'ended':
-                return 'Call Ended';
-            default:
-                return 'Ready to Call';
-        }
-    };
-
-    const getStatusColor = () => {
-        switch (callStatus) {
-            case 'connecting':
-                return 'text-yellow-600';
-            case 'active':
-                return 'text-green-600';
-            case 'ended':
-                return 'text-gray-600';
-            default:
-                return 'text-blue-600';
-        }
-    };
-
-    const getMessageStyle = (type) => {
-        switch (type) {
-            case 'ai':
-                return 'bg-gradient-to-r from-blue-50 to-indigo-100 border-blue-200 text-blue-900 shadow-blue-100';
-            case 'user':
-                return 'bg-gradient-to-r from-green-50 to-emerald-100 border-green-200 text-green-900 shadow-green-100';
-            case 'system':
-                return 'bg-gradient-to-r from-purple-50 to-violet-100 border-purple-200 text-purple-900 shadow-purple-100';
-            case 'error':
-                return 'bg-gradient-to-r from-red-50 to-rose-100 border-red-200 text-red-900 shadow-red-100';
-            default:
-                return 'bg-gradient-to-r from-gray-50 to-slate-100 border-gray-200 text-gray-900 shadow-gray-100';
-        }
-    };
-
-    const getMessageIcon = (type) => {
-        switch (type) {
-            case 'ai':
-                return '🤖 Assessment Bot';
-            case 'user':
-                return '👤 Parent Response';
-            case 'system':
-                return '📱 System';
-            case 'error':
-                return '⚠️ Error';
-            default:
-                return '💬 Message';
-        }
-    };
 
     return (
-        <div className="h-screen bg-gradient-to-br bg-white flex items-center justify-center  relative">
-            {/* Main Assessment Interface */}
-            <div className=" rounded-2xl w-full  h-full  overflow-hidden pb-24">
-                
+        <div className="bg-gradient-to-br bg-white h-full flex flex-col">
+            {/* Header - Fixed at top */}
+            <div className="flex-shrink-0 w-[95%] mx-auto px-6 pt-6 pb-2">
+                <h1 className="heading neu">Social Interaction</h1>
+            </div>
 
-                {/* Messages Area with Enhanced Styling and Auto-scroll */}
-                <div id="messages-container" className="h-full w-[95%] mx-auto alliance  overflow-y-auto  scroll-smooth">
-                    <div className="p-6 space-y-6 pb-52">
-                        {messages.map((message) => (
-                            <div
-                                key={message.id}
-                                className={`flex ${message.type === 'ai' || message.type === 'system' || message.type === 'error' ? 'justify-start' : 'justify-end'}`}
-                            >
-                                <div className={`flex flex-col max-w-xs lg:max-w-2xl ${message.type === 'user' ? 'items-end' : 'items-start'}`}>
-                                    {/* Enhanced Message Bubble */}
-                                    <div className={`relative px-6 py-4 rounded-2xl  transition-all duration-300  flex items-start gap-4`}>
-                                        
-                                        {/* Female Avatar for AI messages */}
-                                        {message.type === 'ai' && (
-                                            <div className="flex-shrink-0">
-                                                <img 
-                                                    src="/female.svg" 
-                                                    alt="AI Assistant" 
-                                                    className="w-11 h-11 rounded-full"
-                                                />
-                                            </div>
-                                        )}
-                                        
-                                        {/* Message Content */}
-                                        <div className="flex-1">
-                                            {message.text === 'speaking' ? (
-                                                <div className="flex items-center space-x-2">
-                                                    <SoundWaveform />
-                                                </div>
-                                            ) : (
-                                                <p className="text-[#222836] alliance text-[28px] font-normal leading-[40px] tracking-[-0.56px]">{message.text}</p>
-                                            )}
-                                        </div>
+            {/* Messages Area with Enhanced Styling and Auto-scroll */}
+            <div className={`flex-1 ${messages.length === 0 ? 'overflow-hidden' : 'overflow-y-auto'} scroll-smooth`}>
+                <div id="messages-container" className="w-[95%] mx-auto alliance">
+                    <div className="p-6 pt-4 space-y-6">
+                        {messages.length === 0 ? (
+                            <div className={`flex flex-col items-center  justify-center h-full min-h-[65vh] space-y-4`}>
+                                <img
+                                    src="/female.svg"
+                                    alt="AI Assistant"
+                                    className="w-32 h-32 rounded-full opacity-50"
+                                />
 
-                                    </div>
-                                    {/* Enhanced Timestamp */}
-                                    <span className="text-xs text-gray-400 mt-2 px-3 font-medium">
-                                        {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                    </span>
-                                </div>
                             </div>
-                        ))}
+                        ) : (
+                            messages.map((message) => (
+                                <div
+                                    key={message.id}
+                                    className={`flex ${message.type === 'ai' || message.type === 'system' || message.type === 'error' ? 'justify-start' : 'justify-end'}`}
+                                >
+                                    <div className={`flex flex-col max-w-xs lg:max-w-2xl ${message.type === 'user' ? 'items-end' : 'items-start'}`}>
+                                        {/* Enhanced Message Bubble */}
+                                        <div className={`relative px-6 py-4 rounded-2xl transition-all duration-300 flex items-start gap-4`}>
+
+                                            {/* Female Avatar for AI messages */}
+                                            {message.type === 'ai' && (
+                                                <div className="flex-shrink-0">
+                                                    <img
+                                                        src="/female.svg"
+                                                        alt="AI Assistant"
+                                                        className="w-11 h-11 rounded-full"
+                                                    />
+                                                </div>
+                                            )}
+
+                                            {/* Message Content */}
+                                            <div className="flex-1">
+                                                {message.text === 'speaking' ? (
+                                                    <div className="flex items-center space-x-2">
+                                                        <SoundWaveform />
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-[#222836] alliance text-[28px] font-normal leading-[40px] tracking-[-0.56px]">{message.text}</p>
+                                                )}
+                                            </div>
+
+                                        </div>
+                                        {/* Enhanced Timestamp */}
+                                        <span className="text-xs text-gray-400 mt-2 px-3 font-medium">
+                                            {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
             </div>
 
-            {/* Floating Input Area at Bottom Center */}
-            <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-full max-w-4xl px-6 z-50">
-                <div className="bg-white border border-gray-300 hanken rounded-3xl shadow-2xl p-6 px-6">
-                    {/* First Row - Input Field */}
-                    <form onSubmit={handleTextSubmit} className="space-y-4">
-                        <div className="relative">
-                            <input
-                                type="text"
-                                value={textInput}
-                                onChange={(e) => setTextInput(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && !e.shiftKey) {
-                                        e.preventDefault();
-                                        handleTextSubmit(e);
-                                    }
-                                }}
-                                placeholder="Type your response or use the microphone..."
-                                className="w-full    text-xl focus:outline-none    transition-all duration-200  "
-                            />
-                            {/* Clear Text Button */}
-                            {textInput && (
-                                <button
-                                    type="button"
-                                    onClick={() => setTextInput('')}
-                                    className="absolute right-4 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-100"
-                                >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            )}
-
-                            {/* Send Button (positioned at the end of input) */}
-                            {textInput.trim() && (
-                                <button
-                                    type="submit"
-                                    className="absolute right-16 top-1/2 -translate-y-1/2 p-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl shadow-lg transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300"
-                                    aria-label="Send message"
-                                >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                                    </svg>
-                                </button>
-                            )}
-                        </div>
-
-                        {/* Second Row - Waveform, Mic Button, and Call Indicators */}
-                        <div className="flex items-center justify-between">
-                            {/* Left Side - Waveform with Call Indicators */}
-                            <div className="flex items-center space-x-3">
-                                <div className="flex items-center">
-                                    <Waveform
-                                        isActive={callStatus === 'active' && !isMuted}
-                                        width={120}
-                                        height={40}
+            {/* Fixed Input Section */}
+            <div className="flex-shrink-0 py-6 bg-white">
+                <div className="w-full max-w-2xl mx-auto px-6">
+                    <div className="bg-white border border-gray-300 hanken rounded-xl shadow-lg p-2 px-6">
+                        <form onSubmit={handleTextSubmit}>
+                            {/* Single Row - Input Field and Mic Button */}
+                            <div className="flex items-center gap-4">
+                                {/* Input Field Container */}
+                                <div className="relative flex-1">
+                                    <input
+                                        type="text"
+                                        value={textInput}
+                                        onChange={(e) => setTextInput(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                                e.preventDefault();
+                                                handleTextSubmit(e);
+                                            }
+                                        }}
+                                        placeholder="Type your response or use the microphone..."
+                                        className="w-full text-xl text-[14px] focus:outline-none transition-all duration-200 pr-24"
                                     />
-                                </div>
+                                    {/* Clear Text Button */}
+                                    {textInput && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setTextInput('')}
+                                            className="absolute right-14 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-100"
+                                        >
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    )}
 
-                                {/* Call Indicators - positioned at extreme right of waveform */}
-                                <div className="flex items-center space-x-2 text-sm">
-                                    <div className={`w-2 h-2 rounded-full ${callStatus === 'active' ? 'bg-green-500 animate-pulse' :
-                                        callStatus === 'connecting' ? 'bg-yellow-500 animate-pulse' :
-                                            callStatus === 'ended' ? 'bg-red-400' : 'bg-gray-400'
-                                        }`}></div>
-                                    <span className={`font-medium ${getStatusColor()}`}>
-                                        {getStatusText()}
-                                    </span>
-                                    {isConnecting && (
-                                        <div className="ml-2 w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                                    {/* Send Button */}
+                                    {textInput.trim() && (
+                                        <button
+                                            type="submit"
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl shadow-lg transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300"
+                                            aria-label="Send message"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                            </svg>
+                                        </button>
                                     )}
                                 </div>
-                            </div>
 
-                            {/* Right Side - Mute and Microphone Buttons */}
-                            <div className="flex items-center space-x-3">
-                                {/* Mute Button - only show when call is active */}
-                                {callStatus === 'active' && (
+                                {/* Right Side - Mute and Microphone Buttons */}
+                                <div className="flex items-center space-x-3 flex-shrink-0">
+                                    {/* Mute Button - only show when call is active */}
+                                    {callStatus === 'active' && (
+                                        <button
+                                            type="button"
+                                            onClick={handleMuteToggle}
+                                            className={`p-3 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-offset-2 ${isMuted
+                                                ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 focus:ring-red-300 text-white'
+                                                : 'bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 focus:ring-gray-300 text-white'
+                                                }`}
+                                            aria-label={isMuted ? 'Unmute microphone' : 'Mute microphone'}
+                                        >
+                                            {isMuted ? (
+                                                // Muted icon
+                                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M16.5 12A4.5 4.5 0 0 0 12 7.5v.75m0 6v.75a4.5 4.5 0 0 1-4.5-4.5V12m0 0v.75a5.25 5.25 0 0 0 10.5 0V12m-9-7.5h7.5M12 18.75V22.5m-6-3.75h12" />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636 5.636 18.364" />
+                                                </svg>
+                                            ) : (
+                                                // Unmuted icon
+                                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z" />
+                                                    <path d="M19 10v1a7 7 0 0 1-14 0v-1h2v1a5 5 0 0 0 10 0v-1h2z" />
+                                                </svg>
+                                            )}
+                                        </button>
+                                    )}
+
+                                    {/* Microphone Button */}
                                     <button
                                         type="button"
-                                        onClick={handleMuteToggle}
-                                        className={`p-3 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-offset-2 ${isMuted
+                                        onClick={handleMicToggle}
+                                        disabled={isConnecting}
+                                        className={`p-3 rounded-md shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-offset-2 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed ${callStatus === 'active'
                                             ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 focus:ring-red-300 text-white'
-                                            : 'bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 focus:ring-gray-300 text-white'
+                                            : isConnecting
+                                                ? 'bg-gradient-to-r from-yellow-500 to-orange-500 focus:ring-yellow-300 text-white'
+                                                : 'bg-gradient-to-r bg-[#EFEFEF] text-black'
                                             }`}
-                                        aria-label={isMuted ? 'Unmute microphone' : 'Mute microphone'}
+                                        aria-label={callStatus === 'active' ? 'Stop voice session' : 'Start voice session'}
                                     >
-                                        {isMuted ? (
-                                            // Muted icon
-                                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M16.5 12A4.5 4.5 0 0 0 12 7.5v.75m0 6v.75a4.5 4.5 0 0 1-4.5-4.5V12m0 0v.75a5.25 5.25 0 0 0 10.5 0V12m-9-7.5h7.5M12 18.75V22.5m-6-3.75h12" />
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636 5.636 18.364" />
-                                            </svg>
-                                        ) : (
-                                            // Unmuted icon
-                                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z" />
-                                                <path d="M19 10v1a7 7 0 0 1-14 0v-1h2v1a5 5 0 0 0 10 0v-1h2z" />
-                                            </svg>
-                                        )}
+                                        <div className="relative">
+                                            {isConnecting ? (
+                                                <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                            ) : callStatus === 'active' ? (
+                                                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M6 6h12v12H6z" />
+                                                </svg>
+                                            ) : (
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none">
+                                                    <path d="M12 14C11.1667 14 10.4583 13.7083 9.875 13.125C9.29167 12.5417 9 11.8333 9 11V5C9 4.16667 9.29167 3.45833 9.875 2.875C10.4583 2.29167 11.1667 2 12 2C12.8333 2 13.5417 2.29167 14.125 2.875C14.7083 3.45833 15 4.16667 15 5V11C15 11.8333 14.7083 12.5417 14.125 13.125C13.5417 13.7083 12.8333 14 12 14ZM11 21V17.925C9.26667 17.6917 7.83333 16.9167 6.7 15.6C5.56667 14.2833 5 12.75 5 11H7C7 12.3833 7.4875 13.5625 8.4625 14.5375C9.4375 15.5125 10.6167 16 12 16C13.3833 16 14.5625 15.5125 15.5375 14.5375C16.5125 13.5625 17 12.3833 17 11H19C19 12.75 18.4333 14.2833 17.3 15.6C16.1667 16.9167 14.7333 17.6917 13 17.925V21H11ZM12 12C12.2833 12 12.5208 11.9042 12.7125 11.7125C12.9042 11.5208 13 11.2833 13 11V5C13 4.71667 12.9042 4.47917 12.7125 4.2875C12.5208 4.09583 12.2833 4 12 4C11.7167 4 11.4792 4.09583 11.2875 4.2875C11.0958 4.47917 11 4.71667 11 5V11C11 11.2833 11.0958 11.5208 11.2875 11.7125C11.4792 11.9042 11.7167 12 12 12Z" fill="#5C756B" />
+                                                </svg>
+                                            )}
+
+                                            {/* Pulse animation for active state */}
+                                            {callStatus === 'active' && (
+                                                <div className="absolute inset-0 rounded-2xl bg-red-400 opacity-40 animate-ping"></div>
+                                            )}
+                                        </div>
                                     </button>
-                                )}
-
-                                {/* Microphone Button */}
-                                <button
-                                    type="button"
-                                    onClick={handleMicToggle}
-                                    disabled={isConnecting}
-                                    className={`p-4 rounded-2xl shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-offset-2 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed ${callStatus === 'active'
-                                        ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 focus:ring-red-300 text-white'
-                                        : isConnecting
-                                            ? 'bg-gradient-to-r from-yellow-500 to-orange-500 focus:ring-yellow-300 text-white'
-                                            : 'bg-gradient-to-r bg-[#5FCA89] text-white'
-                                        }`}
-                                    aria-label={callStatus === 'active' ? 'Stop voice session' : 'Start voice session'}
-                                >
-                                    <div className="relative">
-                                        {isConnecting ? (
-                                            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                        ) : callStatus === 'active' ? (
-                                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M6 6h12v12H6z" />
-                                            </svg>
-                                        ) : (
-                                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z" />
-                                                <path d="M19 10v1a7 7 0 0 1-14 0v-1h2v1a5 5 0 0 0 10 0v-1h2z" />
-                                                <path d="M12 18v4m-4 0h8" />
-                                            </svg>
-                                        )}
-
-                                        {/* Pulse animation for active state */}
-                                        {callStatus === 'active' && (
-                                            <div className="absolute inset-0 rounded-2xl bg-red-400 opacity-40 animate-ping"></div>
-                                        )}
-                                    </div>
-                                </button>
+                                </div>
                             </div>
-                        </div>
-                    </form>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

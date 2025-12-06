@@ -4,14 +4,21 @@
     font-family: "alliance";
     src: url("/public/fonts/a-r.otf");
 }
+@font-face {
+    font-family: "neu";
+    src: url("/public/fonts/NeueMontreal-Regular.otf");
+}
 
-.hanken{
+.hanken {
     font-family: "Hanken Grotesk", sans-serif;
     font-weight: 400;
 }
 
-.alliance{
+.alliance {
     font-family: "alliance", sans-serif;
+}
+.neu {
+    font-family: "neu", sans-serif;
 }
 
 ::-webkit-scrollbar {
@@ -29,4 +36,17 @@
 
 ::-webkit-scrollbar-thumb:hover {
     background: #555;
+}
+
+
+/* text */
+.heading {
+    color: #1A5845;
+    leading-trim: both;
+    text-edge: cap;
+    font-size: 30px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 56px;
+    /* 140% */
 }
